@@ -22,18 +22,26 @@ def convert_inputs(inputs, output, palette):
         # 
         with open(input, 'rb') as f:
             f.seek(-4, os.SEEK_END)
-            count_images = struct.unpack('<I', f.read(4))[0] & 0x7FFFFFFF
+            count_images = struct.unpack('<I', f.read(4))[0]
+            have_palette = count_images & 0x80000000
+            if not have_palette and palette is None:
+                print('error: %s does not have own palette and no custom palette is specified'%input)
+                sys.exit(1)
+            count_images &= 0x7FFFFFFF
             print('reading: %s (%d images)'%(input, count_images))
             f.seek(0, os.SEEK_SET)
             if palette is not None:
                 print('using palette: %s'%palette)
                 pal = load_palette(palette)
-                f.seek(256*4, os.SEEK_CUR)
-            else:
+                if have_palette:
+                    f.seek(256*4, os.SEEK_CUR)
+            elif have_palette:
                 print('using internal palette')
                 pal = []
                 for i in range(256):
                     pal.append(struct.unpack('>I', f.read(4))[0] >> 8)
+            else:
+                pal = [0] * 256
             for i in range(count_images):
                 pixels = []
                 img_w, img_h, img_data_size = struct.unpack('<III', f.read(12))
