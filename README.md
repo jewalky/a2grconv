@@ -4,6 +4,8 @@ This is a collection of scripts to convert ROM2 graphics (.16, .256) to and from
 
 16A is currently not supported, may add it in the future.
 
+spritesb.256 (transparency map) is not supported and there are plans to add it later.
+
 ## Prerequisites
 
 1. Python 3.5+
